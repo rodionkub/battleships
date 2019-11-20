@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.effect.Bloom?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.text.Font?>
+
+<Pane fx:id="room" prefHeight="48.0" prefWidth="185.0" style="-fx-border-color:black;" xmlns:fx="http://javafx.com/fxml/1">
+    <children>
+        <Label layoutX="7.0" layoutY="6.0" text="Создатель комнаты">
+            <font>
+                <Font size="8.0" />
+            </font>
+        </Label>
+        <Label layoutX="89.0" layoutY="6.0" text="username">
+            <font>
+                <Font name="System Bold" size="8.0" />
+            </font>
+        </Label>
+        <Label layoutX="7.0" layoutY="24.0" text="Сейчас в комнате:" />
+        <Label layoutX="134.0" layoutY="24.0" text="1/2" />
+    </children>
+    <opaqueInsets>
+        <Insets />
+    </opaqueInsets>
+    <cursor>
+        <Cursor fx:constant="DEFAULT" />
+    </cursor>
+    <effect>
+        <Bloom />
+    </effect></Pane>
+
