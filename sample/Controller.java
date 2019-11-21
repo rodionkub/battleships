@@ -16,6 +16,7 @@ import javafx.stage.Stage;
 import obj.Room;
 
 import java.io.IOException;
+import java.net.Socket;
 import java.net.URL;
 import java.util.ResourceBundle;
 
@@ -25,6 +26,7 @@ public class Controller implements Initializable {
     @FXML private Button nameUpdateButton;
     @FXML private Label nameLabel;
     @FXML private TextField nameField;
+    @FXML private Pane mainPane;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -57,6 +59,7 @@ public class Controller implements Initializable {
     }
 
     private void setRoomOnClick() {
+        System.out.println(vBox.getChildren());
         for (Node node: vBox.getChildren()) {
             node.setOnMouseClicked(e -> {
                 FXMLLoader loader = new FXMLLoader();
@@ -71,6 +74,9 @@ public class Controller implements Initializable {
                 stage.setTitle("Поле боя");
                 stage.setScene(new Scene(root));
                 stage.show();
+                mainPane.getScene().getWindow().hide();
+
+
             });
         }
     }

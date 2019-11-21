@@ -2,19 +2,20 @@ package battleship;
 
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.geometry.Insets;
-import javafx.scene.Group;
 import javafx.scene.Node;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.image.Image;
+import javafx.scene.control.TitledPane;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.*;
 import javafx.scene.layout.*;
-import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Text;
+import javafx.stage.Modality;
+import javafx.stage.Popup;
+import javafx.stage.Stage;
+import javafx.stage.Window;
 
 import java.net.URL;
-import java.sql.SQLOutput;
 import java.util.ArrayList;
 import java.util.ResourceBundle;
 
@@ -40,6 +41,8 @@ public class BattleshipBoardController implements Initializable {
     private Label battleship4Label;
     @FXML
     private AnchorPane window;
+    @FXML
+    private Button readyButton;
     private double startDragX;
     private double startDragY;
     private ArrayList<Rectangle> rectangles = new ArrayList<>();
@@ -50,6 +53,7 @@ public class BattleshipBoardController implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         addCells();
         setGridActions();
+        setReadyButtonOnClick();
         initializeBattleships();
         setArrayOfLabels();
         for (Battleship battleship : battleships) {
@@ -127,6 +131,10 @@ public class BattleshipBoardController implements Initializable {
                             }
                             battleship.used();
                             labels.get(battleships.indexOf(battleship)).setText(battleship.getLeft() + "x");
+                            if (allShipsSet()) {
+                                readyButton.setText("Готово. В бой!");
+                                readyButton.setDisable(false);
+                            }
                         }
                     }
                 }
@@ -137,7 +145,6 @@ public class BattleshipBoardController implements Initializable {
 
     private boolean isPlaceable(int i, int length) {
         for (int j = i; j < i + length * 10; j += 10) {
-            System.out.println(j);
             if (j % 10 != 0 && j % 10 != 1) {
                 if (!((j - 1 <= 0 || !gridPane.getChildren().get(j - 1).getStyle().contains("green")) &&
                         (j + 1 > 100 || !gridPane.getChildren().get(j + 1).getStyle().contains("green")) &&
@@ -204,5 +211,23 @@ public class BattleshipBoardController implements Initializable {
                 gridPane.getChildren().add(pane);
             }
         }
+    }
+
+    private boolean allShipsSet() {
+        return true;
+//        return battleship1Label.getText().equals("0x") &&
+//                battleship2Label.getText().equals("0x") &&
+//                battleship3Label.getText().equals("0x") &&
+//                battleship4Label.getText().equals("0x");
+    }
+
+    private void setReadyButtonOnClick() {
+        readyButton.setOnMouseClicked(e -> {
+            boolean condition = true;
+            if (condition) {
+                readyButton.setDisable(true);
+                readyButton.setText("Ждем, оппонента...");
+            }
+        });
     }
 }
