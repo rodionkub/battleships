@@ -12,6 +12,7 @@ public class Server {
     public static ArrayList<Connection> clients = null;
     public static ArrayList<Room> rooms = new ArrayList<>();
     public static void main(String[] args) throws IOException {
+        rooms.add(new Room());
         int port = 2000;
         clients = new ArrayList<>();
         ServerSocket serverSocket = new ServerSocket(port);

@@ -14,10 +14,12 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import obj.Room;
+import serverMessages.newConnectionToRoom;
 
 import java.io.IOException;
 import java.net.Socket;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.ResourceBundle;
 
 public class Controller implements Initializable {
@@ -30,31 +32,38 @@ public class Controller implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        updateRooms();
+        try {
+            updateRooms();
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
         updateName();
         setNameOnClick();
-        setUpdateOnClick();
         setRoomOnClick();
+        setUpdateOnClick();
     }
 
-    private void updateRooms() {
+    private void updateRooms() throws IOException, ClassNotFoundException {
         Node node = vBox.getChildren().get(0);
         vBox.getChildren().clear();
         vBox.getChildren().add(node);
-        for (Room roomObject: Main.rooms) {
-            FXMLLoader loader = new FXMLLoader();
-            loader.setLocation(getClass().getResource("room.fxml"));
-            Pane roomTemplate = null;
-            try {
-                roomTemplate = loader.load();
-            } catch (IOException e) {
-                e.printStackTrace();
+        ArrayList<Room> rooms = (ArrayList<Room>) Main.sendReturnableMessage("getRooms()");
+        for (Room roomObject: rooms) {
+            if (roomObject.getConnectedCount() < 2) {
+                FXMLLoader loader = new FXMLLoader();
+                loader.setLocation(getClass().getResource("room.fxml"));
+                Pane roomTemplate = null;
+                try {
+                    roomTemplate = loader.load();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                Pane newRoom = new Pane();
+                newRoom.getChildren().addAll(roomTemplate.getChildren());
+                ((Label) newRoom.getChildren().get(1)).setText(roomObject.getOwner());
+                ((Label) newRoom.getChildren().get(3)).setText(roomObject.getConnectedCount() + "/2");
+                vBox.getChildren().add(newRoom);
             }
-            Pane newRoom = new Pane();
-            newRoom.getChildren().addAll(roomTemplate.getChildren());
-            ((Label)newRoom.getChildren().get(1)).setText(roomObject.getOwner());
-            ((Label)newRoom.getChildren().get(3)).setText(roomObject.getConnectedCount() + "/2");
-            vBox.getChildren().add(newRoom);
         }
     }
 
@@ -76,6 +85,13 @@ public class Controller implements Initializable {
                 stage.show();
                 mainPane.getScene().getWindow().hide();
 
+                int clickedRoomIndex = vBox.getChildren().indexOf(node);
+                String name = nameLabel.getText();
+                try {
+                    Main.sendMessageToServer(new newConnectionToRoom(clickedRoomIndex - 1, name));
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
 
             });
         }
@@ -95,6 +111,12 @@ public class Controller implements Initializable {
     }
 
     private void setUpdateOnClick() {
-        updateButton.setOnMouseClicked(e -> updateRooms());
+        updateButton.setOnMouseClicked(e -> {
+            try {
+                updateRooms();
+            } catch (IOException | ClassNotFoundException ex) {
+                ex.printStackTrace();
+            }
+        });
     }
 }

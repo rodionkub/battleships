@@ -19,29 +19,23 @@ import java.net.Socket;
 import java.util.ArrayList;
 
 public class Main extends Application {
-    public static ArrayList<Room> rooms = new ArrayList<>();
     public static String name = "ferr3t";
     private static Socket socket;
     private boolean trashRead = false;
     private static DataInputStream dis;
-    private ObjectOutputStream out;
+    private static ObjectInputStream in;
+    private static ObjectOutputStream out;
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        rooms.add(new Room("ferr3t", 1));
-        System.out.println(rooms.get(0));
-        rooms.add(new Room("rodionkub", 1));
         FXMLLoader loader = new FXMLLoader();
         loader.setController(new Controller());
         loader.setLocation(getClass().getResource("sample.fxml"));
         Parent root = loader.load();
         Scene scene = new Scene(root);
 
-        socket = new Socket("localhost", 2000);
-        dis = new DataInputStream(socket.getInputStream());
-        OutputStream os = socket.getOutputStream();
-        out = new ObjectOutputStream(os);
-        out.writeObject(rooms.get(0));
+        InputStream is = socket.getInputStream();
+        dis = new DataInputStream(is);
 
         new Thread(() -> {
             while (true) {
@@ -66,16 +60,18 @@ public class Main extends Application {
     }
 
 
-    public void addNewRoom(Room room) {
-        rooms.add(room);
-    }
-
-    private void removeRoom(Room room) {
-        rooms.remove(room);
-    }
-
-    public void sendMessageToServer(String message) throws IOException {
+    public static void sendMessageToServer(Object message) throws IOException {
         out.writeObject(message);
+    }
+
+    public static Object sendReturnableMessage(Object message) throws IOException, ClassNotFoundException {
+        socket = new Socket("localhost", 2000);
+        out = new ObjectOutputStream(socket.getOutputStream());
+        out.writeObject(message);
+        in = new ObjectInputStream(socket.getInputStream());
+        Object input = in.readObject();
+        System.out.println("found: " + input);
+        return input;
     }
 
 

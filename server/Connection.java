@@ -1,6 +1,7 @@
 package server;
 
 import obj.Room;
+import serverMessages.newConnectionToRoom;
 
 import java.io.*;
 import java.net.Socket;
@@ -33,7 +34,17 @@ public class Connection implements Runnable {
                     System.out.println(input);
 
                     if (input instanceof Room) {
+                        Server.rooms.add((Room)input);
                         System.out.println("i got the room, bro! its " + ((Room)input).getOwner() + "'s room!");
+                    }
+                    else if (input instanceof newConnectionToRoom) {
+                        Room room = Server.rooms.get(((newConnectionToRoom)input).getRoomIndex());
+                        room.newConnection(((newConnectionToRoom) input).getName());
+                    }
+                    else if (input instanceof String) {
+                        if (input.toString().equals("getRooms()")) {
+                            objectOut.writeObject(Server.rooms);
+                        }
                     }
                 }
             } catch (IOException | ClassNotFoundException e) {
