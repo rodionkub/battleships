@@ -234,7 +234,9 @@ public class BattleshipBoardController implements Initializable {
             }
             Main.field = field;
             try {
-                allReady = (String) Main.sendReturnableMessage((new NewFieldSubmission(Main.name, field)));
+                Object input = Main.sendReturnableMessage((new NewFieldSubmission(Main.name, field)));
+                System.out.println("opa: " + input);
+                allReady = (String) input;
             } catch (IOException | ClassNotFoundException | InterruptedException ex) {
                 ex.printStackTrace();
             }

@@ -18,10 +18,11 @@ import serverMessages.AttackMessage;
 import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Random;
 
 public class Main extends Application {
-    public static String name = "ferr3t";
-    private static Socket socket;
+    public static String name;
+    private Socket socket;
     private static ObjectInputStream in;
     private static ObjectOutputStream out;
     public static Room room;
@@ -35,6 +36,7 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
+        name = "user" + new Random().nextInt(1000);
         socket = new Socket("localhost", 2000);
         out = new ObjectOutputStream(socket.getOutputStream());
         in = new ObjectInputStream(socket.getInputStream());
@@ -50,7 +52,6 @@ public class Main extends Application {
                 try {
                     Object input;
                     input = in.readObject();
-                    System.out.println(input);
                     if (input instanceof ArrayList) {
                         returnedMessage = input;
                         continue;

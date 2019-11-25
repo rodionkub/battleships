@@ -7,13 +7,14 @@ import serverMessages.NewFieldSubmission;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.ArrayList;
 
 public class Connection implements Runnable {
     private DataInputStream in;
     private ObjectOutputStream objectOut;
     private ObjectInputStream objectIn;
-    private DataOutputStream textOut;
     private Socket client;
+    private String name;
 
     public Connection(Socket client) throws IOException {
         this.client = client;
@@ -24,8 +25,8 @@ public class Connection implements Runnable {
 
         OutputStream os = client.getOutputStream();
         this.objectOut = new ObjectOutputStream(os);
-        this.textOut = new DataOutputStream(os);
     }
+
 
     @Override
     public void run() {
@@ -39,13 +40,14 @@ public class Connection implements Runnable {
                     }
                     else if (input instanceof NewConnectionToRoom) {
                         Room room = Server.rooms.get(((NewConnectionToRoom)input).getRoomIndex());
-                        room.newConnection(((NewConnectionToRoom) input).getName(), client);
+                        room.newConnection(((NewConnectionToRoom) input).getName());
                     }
                     else if (input instanceof NewFieldSubmission) {
                         String name = ((NewFieldSubmission) input).getName();
                         String field = ((NewFieldSubmission) input).getField();
 
                         Room foundRoom = null;
+                        int roomIndex = 0;
                         int nameIndex = -1;
 
                         for (Room room: Server.rooms) {
@@ -56,17 +58,20 @@ public class Connection implements Runnable {
                                         nameIndex = i;
                                     }
                                 }
+                                roomIndex++;
                             }
                         }
-                        String allReady = Server.rooms.get(Server.rooms.indexOf(foundRoom)).submitField(name, field);
+                        String allReady = Server.rooms.get(roomIndex - 1).submitField(name, field);
+                        System.out.println("soo " + allReady);
                         if (allReady.equals("ready")) {
                             for (Connection conn : Server.clients) {
-                                if (conn.getSocket() == foundRoom.getClients().get(1 - nameIndex)) {
+                                if (conn.getName().equals(foundRoom.getNames().get(1 - nameIndex))) {
                                     conn.getObjectOut().writeObject("ready");
                                 }
                             }
                         }
                         objectOut.writeObject(allReady);
+                        System.out.println("written");
                     }
                     else if (input instanceof AttackMessage) {
                         String turnName = ((AttackMessage) input).getTurnName();
@@ -94,14 +99,26 @@ public class Connection implements Runnable {
                             objectOut.writeObject("miss");
                         }
                         for (Connection conn : Server.clients) {
-                            if (conn.getSocket() == foundRoom.getClients().get(1 - nameIndex)) {
+                            if (conn.getName().equals(foundRoom.getNames().get(1 - nameIndex))) {
                                 conn.getObjectOut().writeObject("new hit on " + attackIndex);
                             }
                         }
                     }
                     else if (input instanceof String) {
                         if (input.toString().equals("getRooms()")) {
-                            objectOut.writeObject(Server.rooms);
+                            ArrayList<Room> newRooms = new ArrayList<>();
+                            for (Room room: Server.rooms) {
+                                Room newRoom = new Room();
+                                newRoom.setConnectedCount(room.getConnectedCount());
+                                newRoom.setNames(room.getNames());
+                                newRoom.setOwner(room.getOwner());
+                                newRoom.setPlayerFields(room.getPlayerFields());
+                                newRooms.add(newRoom);
+                            }
+                            objectOut.writeObject(newRooms);
+                        }
+                        else if (input.toString().contains("name:")) {
+                            name = input.toString().split(":")[1];
                         }
                         else if (input.toString().contains("dead")) {
                             String name = input.toString().split(" ")[0];
@@ -118,7 +135,7 @@ public class Connection implements Runnable {
                                 }
                             }
                             for (Connection conn : Server.clients) {
-                                if (conn.getSocket() == foundRoom.getClients().get(1 - nameIndex)) {
+                                if (conn.getName().equals(foundRoom.getNames().get(1 - nameIndex))) {
                                     conn.getObjectOut().writeObject("hit");
                                     try {
                                         Thread.sleep(200);
@@ -135,6 +152,10 @@ public class Connection implements Runnable {
                 e.printStackTrace();
             }
         }
+    }
+
+    public String getName() {
+        return name;
     }
 
     public ObjectOutputStream getObjectOut() {

@@ -28,6 +28,7 @@ public class Controller implements Initializable {
     @FXML private TextField nameField;
     @FXML private Pane mainPane;
     private ArrayList<Room> rooms;
+    private int hiddenNodesCount = 0;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -36,7 +37,11 @@ public class Controller implements Initializable {
         } catch (IOException | ClassNotFoundException | InterruptedException e) {
             e.printStackTrace();
         }
-        updateName();
+        try {
+            updateName();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         setNameOnClick();
         setRoomOnClick();
         setUpdateOnClick();
@@ -47,6 +52,11 @@ public class Controller implements Initializable {
         vBox.getChildren().clear();
         vBox.getChildren().add(node);
         rooms = (ArrayList<Room>) Main.sendReturnableMessage("getRooms()");
+        if (rooms.size() == 0) {
+            Room room = new Room();
+            Main.sendMessageToServer(room);
+            rooms.add(room);
+        }
         for (Room roomObject: rooms) {
             if (roomObject.getConnectedCount() < 2) {
                 FXMLLoader loader = new FXMLLoader();
@@ -63,11 +73,37 @@ public class Controller implements Initializable {
                 ((Label) newRoom.getChildren().get(3)).setText(roomObject.getConnectedCount() + "/2");
                 vBox.getChildren().add(newRoom);
             }
+            else {
+                hiddenNodesCount++;
+            }
+        }
+        if (vBox.getChildren().size() == 1) {
+            Room room = new Room();
+            Main.sendMessageToServer(room);
+            rooms.add(room);
+            for (Room roomObject: rooms) {
+                if (roomObject.getConnectedCount() < 2) {
+                    FXMLLoader loader = new FXMLLoader();
+                    loader.setLocation(getClass().getResource("room.fxml"));
+                    Pane roomTemplate = null;
+                    try {
+                        roomTemplate = loader.load();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    Pane newRoom = new Pane();
+                    newRoom.getChildren().addAll(roomTemplate.getChildren());
+                    ((Label) newRoom.getChildren().get(1)).setText(roomObject.getOwner());
+                    ((Label) newRoom.getChildren().get(3)).setText(roomObject.getConnectedCount() + "/2");
+                    vBox.getChildren().add(newRoom);
+                }
+            }
         }
     }
 
     private void setRoomOnClick() {
         for (Node node: vBox.getChildren()) {
+            if (node == vBox.getChildren().get(0)) continue;
             node.setOnMouseClicked(e -> {
                 FXMLLoader loader = new FXMLLoader();
                 loader.setLocation(getClass().getResource("/battleship/battleshipBoard.fxml"));
@@ -83,7 +119,7 @@ public class Controller implements Initializable {
                 stage.show();
                 mainPane.getScene().getWindow().hide();
 
-                int clickedRoomIndex = vBox.getChildren().indexOf(node);
+                int clickedRoomIndex = vBox.getChildren().indexOf(node) + hiddenNodesCount;
                 String name = nameLabel.getText();
 
                 Main.room = rooms.get(clickedRoomIndex - 1);
@@ -92,23 +128,30 @@ public class Controller implements Initializable {
                 } catch (IOException ex) {
                     ex.printStackTrace();
                 }
-
             });
         }
     }
 
-    private void updateName() {
+    private void updateName() throws IOException {
         String name = Main.name;
         nameLabel.setText(name);
+        Main.sendMessageToServer("name:" + name);
     }
 
-    private void updateName(String name) {
+    private void updateName(String name) throws IOException {
         Main.name = name;
         nameLabel.setText(name);
+        Main.sendMessageToServer("name:" + name);
     }
 
     private void setNameOnClick() {
-        nameUpdateButton.setOnMouseClicked(e -> updateName(nameField.getText()));
+        nameUpdateButton.setOnMouseClicked(e -> {
+            try {
+                updateName(nameField.getText());
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        });
     }
 
     private void setUpdateOnClick() {
