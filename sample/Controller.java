@@ -29,6 +29,7 @@ public class Controller implements Initializable {
     @FXML private Label nameLabel;
     @FXML private TextField nameField;
     @FXML private Pane mainPane;
+    private ArrayList<Room> rooms;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -47,7 +48,7 @@ public class Controller implements Initializable {
         Node node = vBox.getChildren().get(0);
         vBox.getChildren().clear();
         vBox.getChildren().add(node);
-        ArrayList<Room> rooms = (ArrayList<Room>) Main.sendReturnableMessage("getRooms()");
+        rooms = (ArrayList<Room>) Main.sendReturnableMessage("getRooms()");
         for (Room roomObject: rooms) {
             if (roomObject.getConnectedCount() < 2) {
                 FXMLLoader loader = new FXMLLoader();
@@ -68,7 +69,6 @@ public class Controller implements Initializable {
     }
 
     private void setRoomOnClick() {
-        System.out.println(vBox.getChildren());
         for (Node node: vBox.getChildren()) {
             node.setOnMouseClicked(e -> {
                 FXMLLoader loader = new FXMLLoader();
@@ -87,6 +87,8 @@ public class Controller implements Initializable {
 
                 int clickedRoomIndex = vBox.getChildren().indexOf(node);
                 String name = nameLabel.getText();
+
+                Main.room = rooms.get(clickedRoomIndex - 1);
                 try {
                     Main.sendMessageToServer(new newConnectionToRoom(clickedRoomIndex - 1, name));
                 } catch (IOException ex) {
@@ -103,6 +105,7 @@ public class Controller implements Initializable {
     }
 
     private void updateName(String name) {
+        Main.name = name;
         nameLabel.setText(name);
     }
 
@@ -114,6 +117,7 @@ public class Controller implements Initializable {
         updateButton.setOnMouseClicked(e -> {
             try {
                 updateRooms();
+                setRoomOnClick();
             } catch (IOException | ClassNotFoundException ex) {
                 ex.printStackTrace();
             }

@@ -1,30 +1,27 @@
 package sample;
 
+import battleship.BattleshipBoardController;
 import javafx.application.Application;
-import javafx.fxml.FXML;
+import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.SplitPane;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
+import javafx.stage.Window;
 import obj.Room;
 
-import javax.xml.crypto.Data;
 import java.io.*;
 import java.net.Socket;
-import java.util.ArrayList;
 
 public class Main extends Application {
     public static String name = "ferr3t";
     private static Socket socket;
-    private boolean trashRead = false;
-    private static DataInputStream dis;
     private static ObjectInputStream in;
     private static ObjectOutputStream out;
+    public static Room room;
+    public static String field;
+    public static Window window;
 
     @Override
     public void start(Stage primaryStage) throws Exception {
@@ -34,20 +31,16 @@ public class Main extends Application {
         Parent root = loader.load();
         Scene scene = new Scene(root);
 
-        InputStream is = socket.getInputStream();
-        dis = new DataInputStream(is);
 
         new Thread(() -> {
             while (true) {
                 try {
-                    if (!trashRead) {
-                        dis.readInt();
-                        trashRead = true;
+                    String input = (String) in.readObject();
+                    System.out.println(input);
+                    if (input.equals("ready")) {
+                        goToBattleWindow();
                     }
-                    if (dis.available() > 0) {
-                        System.out.println(dis.readUTF());
-                    }
-                } catch (IOException e) {
+                } catch (IOException | ClassNotFoundException e) {
                     e.printStackTrace();
                 }
             }
@@ -69,11 +62,28 @@ public class Main extends Application {
         out = new ObjectOutputStream(socket.getOutputStream());
         out.writeObject(message);
         in = new ObjectInputStream(socket.getInputStream());
-        Object input = in.readObject();
-        System.out.println("found: " + input);
-        return input;
+        return in.readObject();
     }
 
+    public static void goToBattleWindow() {
+        Platform.runLater(
+                () -> {
+                    FXMLLoader loader = new FXMLLoader();
+                    loader.setLocation(BattleshipBoardController.class.getResource("/game/game.fxml"));
+                    Parent root = null;
+                    try {
+                        root = loader.load();
+                    } catch (IOException ex) {
+                        ex.printStackTrace();
+                    }
+                    Stage stage = new Stage();
+                    stage.setTitle("Поле боя");
+                    stage.setScene(new Scene(root));
+                    stage.show();
+                    window.getScene().getWindow().hide();
+                }
+        );
+    }
 
     public static void main(String[] args) {
         launch(args);

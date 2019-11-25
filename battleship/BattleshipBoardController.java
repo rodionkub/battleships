@@ -1,8 +1,11 @@
 package battleship;
 
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TitledPane;
@@ -14,7 +17,10 @@ import javafx.stage.Modality;
 import javafx.stage.Popup;
 import javafx.stage.Stage;
 import javafx.stage.Window;
+import sample.Main;
+import serverMessages.newFieldSubmission;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.ResourceBundle;
@@ -223,10 +229,30 @@ public class BattleshipBoardController implements Initializable {
 
     private void setReadyButtonOnClick() {
         readyButton.setOnMouseClicked(e -> {
-            boolean condition = true;
-            if (condition) {
+            Main.window = window.getScene().getWindow();
+            String allReady = null;
+            String field = "";
+            for (int i = 1; i < gridPane.getChildren().size(); i++) {
+                Node node = gridPane.getChildren().get(i);
+                if (node.getStyle().contains("green")) {
+                    field = field.concat("1");
+                }
+                else {
+                    field = field.concat("0");
+                }
+            }
+            Main.field = field;
+            try {
+                allReady = (String) Main.sendReturnableMessage((new newFieldSubmission(Main.room, Main.name, field)));
+            } catch (IOException | ClassNotFoundException ex) {
+                ex.printStackTrace();
+            }
+            if (allReady.equals("not")) {
                 readyButton.setDisable(true);
                 readyButton.setText("Ждем, оппонента...");
+            }
+            else {
+                Main.goToBattleWindow();
             }
         });
     }
