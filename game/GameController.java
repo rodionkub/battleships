@@ -1,5 +1,6 @@
 package game;
 
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
@@ -25,17 +26,11 @@ public class GameController implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         addCells();
-        setGridActions();
+        Main.turnLabel = turnLabel;
+        Main.enemyGridPane = enemyGridPane;
         setAllyGridPane();
         Main.allyGridPane = allyGridPane;
-        try {
-            initLabel();
-        } catch (IOException | ClassNotFoundException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void initLabel() throws IOException, ClassNotFoundException {
+        setGridActions();
     }
 
     private void addCells() {
@@ -72,7 +67,7 @@ public class GameController implements Initializable {
         for (int i = 0; i < enemyGridPane.getChildren().size(); i++) {
             Node node = enemyGridPane.getChildren().get(i);
             node.setOnMouseEntered(e -> {
-                if (!node.getStyle().contains("red")) {
+                if (!node.getStyle().contains("red") && !node.getStyle().contains("black") && !node.getStyle().contains("grey")) {
                     node.setStyle("-fx-background-color: red");
                 }
             });
@@ -81,19 +76,7 @@ public class GameController implements Initializable {
                     node.setStyle("-fx-background-color: default");
                 }
             });
-            node.setOnMouseClicked(e -> {
-                try {
-                    String reply = (String) Main.sendReturnableMessage(new AttackMessage(Main.name, enemyGridPane.getChildren().indexOf(node) - 1));
-                    if (reply.equals("hit")) {
-                        node.setStyle("-fx-background-color: black");
-                    }
-                    else {
-                        node.setStyle("-fx-background-color: grey");
-                    }
-                } catch (IOException | ClassNotFoundException | InterruptedException ex) {
-                    ex.printStackTrace();
-                }
-            });
         }
+        Main.unblock();
     }
 }

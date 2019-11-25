@@ -103,6 +103,32 @@ public class Connection implements Runnable {
                         if (input.toString().equals("getRooms()")) {
                             objectOut.writeObject(Server.rooms);
                         }
+                        else if (input.toString().contains("dead")) {
+                            String name = input.toString().split(" ")[0];
+                            int nameIndex = -1;
+                            Room foundRoom = null;
+                            for (Room room: Server.rooms) {
+                                if (foundRoom == null) {
+                                    for (int i = 0; i < room.getNames().size(); i++) {
+                                        if (name.equals(room.getNames().get(i))) {
+                                            foundRoom = room;
+                                            nameIndex = i;
+                                        }
+                                    }
+                                }
+                            }
+                            for (Connection conn : Server.clients) {
+                                if (conn.getSocket() == foundRoom.getClients().get(1 - nameIndex)) {
+                                    conn.getObjectOut().writeObject("hit");
+                                    try {
+                                        Thread.sleep(200);
+                                    } catch (InterruptedException e) {
+                                        e.printStackTrace();
+                                    }
+                                    conn.getObjectOut().writeObject("victory");
+                                }
+                            }
+                        }
                     }
                 }
             } catch (IOException | ClassNotFoundException e) {

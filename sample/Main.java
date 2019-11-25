@@ -7,11 +7,13 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Label;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 import obj.Room;
+import serverMessages.AttackMessage;
 
 import java.io.*;
 import java.net.Socket;
@@ -27,6 +29,8 @@ public class Main extends Application {
     private static boolean firstTime = false;
     private static Object returnedMessage;
     public static GridPane allyGridPane;
+    public static GridPane enemyGridPane;
+    public static Label turnLabel;
 
     @Override
     public void start(Stage primaryStage) throws Exception {
@@ -49,6 +53,12 @@ public class Main extends Application {
                     }
                     else if (((String)input).contains("new hit on")) {
                         attackedOn(Integer.parseInt(((String)input).split(" ")[3]));
+                    }
+                    else if (input.equals("victory")) {
+                        victoryBlock();
+                        Platform.runLater(() -> {
+                            turnLabel.setText("Вы победили!");
+                        });
                     }
                 } catch (IOException | ClassNotFoundException e) {
                     e.printStackTrace();
@@ -101,7 +111,7 @@ public class Main extends Application {
         );
     }
 
-    private static void attackedOn(int attackedIndex) {
+    private static void attackedOn(int attackedIndex) throws IOException {
         Node attackedNode = allyGridPane.getChildren().get(attackedIndex + 1);
         if (attackedNode.getStyle().contains("green")) {
             attackedNode.setStyle("-fx-background-color: black");
@@ -109,8 +119,53 @@ public class Main extends Application {
         else if (!attackedNode.getStyle().contains("color")) {
             attackedNode.setStyle("-fx-background-color: grey");
         }
+        unblock();
+        if (!checkIfAnyAlive()) {
+            victoryBlock();
+            Platform.runLater(() -> turnLabel.setText("Все ваши корабли подбиты. Вы проиграли."));
+            sendMessageToServer(name + " dead");
+        }
     }
 
+    private static boolean checkIfAnyAlive() {
+        for (Node node: allyGridPane.getChildren()) {
+            if (node.getStyle().contains("green")) {
+                return true;
+            }
+        }
+        return false;
+    }
+    public static void unblock() {
+        Platform.runLater(() -> turnLabel.setText("Ваш ход"));
+        for (Node node: enemyGridPane.getChildren()) {
+            node.setOnMouseClicked(e -> {
+                try {
+                    String reply = (String) Main.sendReturnableMessage(new AttackMessage(Main.name, enemyGridPane.getChildren().indexOf(node) - 1));
+                    if (reply.equals("hit")) {
+                        node.setStyle("-fx-background-color: black");
+                    } else {
+                        node.setStyle("-fx-background-color: grey");
+                    }
+                    blockGrid();
+                } catch (IOException | ClassNotFoundException | InterruptedException ex) {
+                    ex.printStackTrace();
+                }
+            });
+        }
+    }
+
+    private static void blockGrid() {
+        Platform.runLater(() -> turnLabel.setText("Ход оппонента"));
+        for (Node node: enemyGridPane.getChildren()) {
+            node.setOnMouseClicked(e -> {});
+        }
+    }
+
+    private static void victoryBlock() {
+        for (Node node: enemyGridPane.getChildren()) {
+            node.setOnMouseClicked(e -> {});
+        }
+    }
 
     public static void main(String[] args) {
         launch(args);
