@@ -36,9 +36,13 @@
                   <Cursor fx:constant="DEFAULT" />
                </cursor>
                <children>
-                  <Label fx:id="nameLabel" alignment="CENTER" contentDisplay="CENTER" layoutX="183.0" layoutY="74.0" text="unnamed" textAlignment="CENTER" />
                   <TextField fx:id="nameField" layoutX="127.0" layoutY="102.0" promptText="Введите никнейм" />
                   <Button fx:id="nameUpdateButton" layoutX="171.0" layoutY="202.0" mnemonicParsing="false" text="Обновить" />
+                  <VBox layoutX="112.0" layoutY="68.0" prefHeight="27.0" prefWidth="200.0">
+                     <children>
+                        <Label fx:id="nameLabel" alignment="CENTER" contentDisplay="CENTER" prefHeight="30.0" prefWidth="205.0" text="unnamed" textAlignment="CENTER" />
+                     </children>
+                  </VBox>
                </children></AnchorPane>
         </items>
       </SplitPane>

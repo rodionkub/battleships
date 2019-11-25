@@ -17,6 +17,7 @@ import serverMessages.AttackMessage;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.ArrayList;
 
 public class Main extends Application {
     public static String name = "ferr3t";
@@ -34,6 +35,9 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
+        socket = new Socket("localhost", 2000);
+        out = new ObjectOutputStream(socket.getOutputStream());
+        in = new ObjectInputStream(socket.getInputStream());
         FXMLLoader loader = new FXMLLoader();
         loader.setController(new Controller());
         loader.setLocation(getClass().getResource("sample.fxml"));
@@ -47,6 +51,10 @@ public class Main extends Application {
                     Object input;
                     input = in.readObject();
                     System.out.println(input);
+                    if (input instanceof ArrayList) {
+                        returnedMessage = input;
+                        continue;
+                    }
                     returnedMessage = input;
                     if (input.equals("ready")) {
                         goToBattleWindow();
@@ -79,9 +87,6 @@ public class Main extends Application {
 
     public static Object sendReturnableMessage(Object message) throws IOException, ClassNotFoundException, InterruptedException {
         if (!firstTime) {
-            socket = new Socket("localhost", 2000);
-            out = new ObjectOutputStream(socket.getOutputStream());
-            in = new ObjectInputStream(socket.getInputStream());
             firstTime = true;
             out.writeObject(message);
             return in.readObject();
