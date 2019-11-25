@@ -1,6 +1,5 @@
 package sample;
 
-import battleship.BattleshipBoardController;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -14,10 +13,9 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import obj.Room;
-import serverMessages.newConnectionToRoom;
+import serverMessages.NewConnectionToRoom;
 
 import java.io.IOException;
-import java.net.Socket;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.ResourceBundle;
@@ -35,7 +33,7 @@ public class Controller implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         try {
             updateRooms();
-        } catch (IOException | ClassNotFoundException e) {
+        } catch (IOException | ClassNotFoundException | InterruptedException e) {
             e.printStackTrace();
         }
         updateName();
@@ -44,7 +42,7 @@ public class Controller implements Initializable {
         setUpdateOnClick();
     }
 
-    private void updateRooms() throws IOException, ClassNotFoundException {
+    private void updateRooms() throws IOException, ClassNotFoundException, InterruptedException {
         Node node = vBox.getChildren().get(0);
         vBox.getChildren().clear();
         vBox.getChildren().add(node);
@@ -90,7 +88,7 @@ public class Controller implements Initializable {
 
                 Main.room = rooms.get(clickedRoomIndex - 1);
                 try {
-                    Main.sendMessageToServer(new newConnectionToRoom(clickedRoomIndex - 1, name));
+                    Main.sendMessageToServer(new NewConnectionToRoom(clickedRoomIndex - 1, name));
                 } catch (IOException ex) {
                     ex.printStackTrace();
                 }
@@ -118,7 +116,7 @@ public class Controller implements Initializable {
             try {
                 updateRooms();
                 setRoomOnClick();
-            } catch (IOException | ClassNotFoundException ex) {
+            } catch (IOException | ClassNotFoundException | InterruptedException ex) {
                 ex.printStackTrace();
             }
         });

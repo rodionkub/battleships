@@ -3,11 +3,13 @@ package game;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
+import javafx.scene.control.Label;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
-import javafx.scene.shape.Rectangle;
 import sample.Main;
+import serverMessages.AttackMessage;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
@@ -16,6 +18,8 @@ public class GameController implements Initializable {
     private GridPane allyGridPane;
     @FXML
     private GridPane enemyGridPane;
+    @FXML
+    private Label turnLabel;
 
 
     @Override
@@ -23,6 +27,15 @@ public class GameController implements Initializable {
         addCells();
         setGridActions();
         setAllyGridPane();
+        Main.allyGridPane = allyGridPane;
+        try {
+            initLabel();
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void initLabel() throws IOException, ClassNotFoundException {
     }
 
     private void addCells() {
@@ -68,7 +81,19 @@ public class GameController implements Initializable {
                     node.setStyle("-fx-background-color: default");
                 }
             });
-            node.setOnMouseClicked(e -> System.out.println(GridPane.getColumnIndex(node) + " " + GridPane.getRowIndex(node)));
+            node.setOnMouseClicked(e -> {
+                try {
+                    String reply = (String) Main.sendReturnableMessage(new AttackMessage(Main.name, enemyGridPane.getChildren().indexOf(node) - 1));
+                    if (reply.equals("hit")) {
+                        node.setStyle("-fx-background-color: black");
+                    }
+                    else {
+                        node.setStyle("-fx-background-color: grey");
+                    }
+                } catch (IOException | ClassNotFoundException | InterruptedException ex) {
+                    ex.printStackTrace();
+                }
+            });
         }
     }
 }

@@ -4,20 +4,15 @@ import obj.Room;
 
 import java.io.Serializable;
 
-public class newFieldSubmission implements Serializable {
-    private Room room;
+public class NewFieldSubmission implements Serializable {
     private String name;
     private String field;
 
-    public newFieldSubmission(Room room, String name, String field) {
-        this.room = room;
+    public NewFieldSubmission(String name, String field) {
         this.name = name;
         this.field = field;
     }
 
-    public Room getRoom() {
-        return room;
-    }
 
     public String getName() {
         return name;

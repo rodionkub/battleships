@@ -42,6 +42,10 @@ public class Room implements Serializable {
         return "not";
     }
 
+    public String getField(int nameIndex) {
+        return playerFields.get(nameIndex);
+    }
+
     public String getOwner() {
         return owner;
     }

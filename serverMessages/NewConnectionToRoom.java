@@ -4,11 +4,11 @@ import obj.Room;
 
 import java.io.Serializable;
 
-public class newConnectionToRoom implements Serializable {
+public class NewConnectionToRoom implements Serializable {
     private int roomIndex;
     private String name;
 
-    public newConnectionToRoom(int roomIndex, String name) {
+    public NewConnectionToRoom(int roomIndex, String name) {
         this.roomIndex = roomIndex;
         this.name = name;
     }

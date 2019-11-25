@@ -4,9 +4,11 @@ import battleship.BattleshipBoardController;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 import obj.Room;
@@ -22,6 +24,9 @@ public class Main extends Application {
     public static Room room;
     public static String field;
     public static Window window;
+    private static boolean firstTime = false;
+    private static Object returnedMessage;
+    public static GridPane allyGridPane;
 
     @Override
     public void start(Stage primaryStage) throws Exception {
@@ -35,10 +40,15 @@ public class Main extends Application {
         new Thread(() -> {
             while (true) {
                 try {
-                    String input = (String) in.readObject();
+                    Object input;
+                    input = in.readObject();
                     System.out.println(input);
+                    returnedMessage = input;
                     if (input.equals("ready")) {
                         goToBattleWindow();
+                    }
+                    else if (((String)input).contains("new hit on")) {
+                        attackedOn(Integer.parseInt(((String)input).split(" ")[3]));
                     }
                 } catch (IOException | ClassNotFoundException e) {
                     e.printStackTrace();
@@ -57,12 +67,18 @@ public class Main extends Application {
         out.writeObject(message);
     }
 
-    public static Object sendReturnableMessage(Object message) throws IOException, ClassNotFoundException {
-        socket = new Socket("localhost", 2000);
-        out = new ObjectOutputStream(socket.getOutputStream());
+    public static Object sendReturnableMessage(Object message) throws IOException, ClassNotFoundException, InterruptedException {
+        if (!firstTime) {
+            socket = new Socket("localhost", 2000);
+            out = new ObjectOutputStream(socket.getOutputStream());
+            in = new ObjectInputStream(socket.getInputStream());
+            firstTime = true;
+            out.writeObject(message);
+            return in.readObject();
+        }
         out.writeObject(message);
-        in = new ObjectInputStream(socket.getInputStream());
-        return in.readObject();
+        Thread.sleep(100);
+        return returnedMessage;
     }
 
     public static void goToBattleWindow() {
@@ -85,7 +101,19 @@ public class Main extends Application {
         );
     }
 
+    private static void attackedOn(int attackedIndex) {
+        Node attackedNode = allyGridPane.getChildren().get(attackedIndex + 1);
+        if (attackedNode.getStyle().contains("green")) {
+            attackedNode.setStyle("-fx-background-color: black");
+        }
+        else if (!attackedNode.getStyle().contains("color")) {
+            attackedNode.setStyle("-fx-background-color: grey");
+        }
+    }
+
+
     public static void main(String[] args) {
         launch(args);
     }
+
 }

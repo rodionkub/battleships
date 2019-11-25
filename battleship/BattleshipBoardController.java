@@ -1,24 +1,15 @@
 package battleship;
 
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.TitledPane;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.shape.Rectangle;
-import javafx.scene.text.Text;
-import javafx.stage.Modality;
-import javafx.stage.Popup;
-import javafx.stage.Stage;
-import javafx.stage.Window;
 import sample.Main;
-import serverMessages.newFieldSubmission;
+import serverMessages.NewFieldSubmission;
 
 import java.io.IOException;
 import java.net.URL;
@@ -243,16 +234,13 @@ public class BattleshipBoardController implements Initializable {
             }
             Main.field = field;
             try {
-                allReady = (String) Main.sendReturnableMessage((new newFieldSubmission(Main.room, Main.name, field)));
-            } catch (IOException | ClassNotFoundException ex) {
+                allReady = (String) Main.sendReturnableMessage((new NewFieldSubmission(Main.name, field)));
+            } catch (IOException | ClassNotFoundException | InterruptedException ex) {
                 ex.printStackTrace();
             }
             if (allReady.equals("not")) {
                 readyButton.setDisable(true);
                 readyButton.setText("Ждем, оппонента...");
-            }
-            else {
-                Main.goToBattleWindow();
             }
         });
     }
