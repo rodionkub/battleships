@@ -120,7 +120,6 @@ public class Main extends Application {
         primaryStage.show();
     }
 
-
     public static void sendMessageToServer(Object message) throws IOException {
         out.writeObject(message);
     }
@@ -163,8 +162,8 @@ public class Main extends Application {
         }
         else if (!attackedNode.getStyle().contains("color")) {
             attackedNode.setStyle("-fx-background-color: grey");
+            unblock();
         }
-        unblock();
         if (!checkIfAnyAlive()) {
             victoryBlock();
             Platform.runLater(() -> turnLabel.setText("Все ваши корабли подбиты. Вы проиграли."));
