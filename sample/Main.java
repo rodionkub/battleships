@@ -33,21 +33,60 @@ public class Main extends Application {
     public static GridPane allyGridPane;
     public static GridPane enemyGridPane;
     public static Label turnLabel;
+    public static String ip = null;
+    private static Parent root;
+    private static Scene scene;
 
     @Override
     public void start(Stage primaryStage) throws Exception {
         name = "user" + new Random().nextInt(1000);
-        socket = new Socket("localhost", 2000);
-        out = new ObjectOutputStream(socket.getOutputStream());
-        in = new ObjectInputStream(socket.getInputStream());
         FXMLLoader loader = new FXMLLoader();
-        loader.setController(new Controller());
-        loader.setLocation(getClass().getResource("sample.fxml"));
-        Parent root = loader.load();
-        Scene scene = new Scene(root);
-
+        loader.setLocation(getClass().getResource("connect.fxml"));
+        root = loader.load();
+        scene = new Scene(root);
 
         new Thread(() -> {
+            while (ip == null) {
+                System.out.println("thread ip " + ip);
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+            Platform.runLater(() -> {
+                try {
+                    socket = new Socket(ip, 2000);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                try {
+                    out = new ObjectOutputStream(socket.getOutputStream());
+                    in = new ObjectInputStream(socket.getInputStream());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                FXMLLoader loader2 = new FXMLLoader();
+                loader2.setController(new Controller());
+                loader2.setLocation(getClass().getResource("sample.fxml"));
+                scene.getWindow().hide();
+                Parent root = null;
+                try {
+                    root = loader2.load();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                scene = new Scene(root);
+                Stage stage = new Stage();
+                stage.setTitle("Выбор комнаты");
+                stage.setScene(scene);
+                stage.show();
+            });
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
             while (true) {
                 try {
                     Object input;
@@ -151,8 +190,8 @@ public class Main extends Application {
                         node.setStyle("-fx-background-color: black");
                     } else {
                         node.setStyle("-fx-background-color: grey");
+                        blockGrid();
                     }
-                    blockGrid();
                 } catch (IOException | ClassNotFoundException | InterruptedException ex) {
                     ex.printStackTrace();
                 }

@@ -211,11 +211,10 @@ public class BattleshipBoardController implements Initializable {
     }
 
     private boolean allShipsSet() {
-        return true;
-//        return battleship1Label.getText().equals("0x") &&
-//                battleship2Label.getText().equals("0x") &&
-//                battleship3Label.getText().equals("0x") &&
-//                battleship4Label.getText().equals("0x");
+        return battleship1Label.getText().equals("0x") &&
+                battleship2Label.getText().equals("0x") &&
+                battleship3Label.getText().equals("0x") &&
+                battleship4Label.getText().equals("0x");
     }
 
     private void setReadyButtonOnClick() {
