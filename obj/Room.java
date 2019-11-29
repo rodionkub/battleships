@@ -28,9 +28,8 @@ public class Room implements Serializable {
     }
 
     public String submitField(String name, String field) {
-        System.out.println(name);
-        System.out.println(names);
         playerFields.set(names.indexOf(name), field);
+        System.out.println(name + " " + field);
         if (!playerFields.get(1 - names.indexOf(name)).equals("")) {
             return "ready";
         }

@@ -131,7 +131,7 @@ public class Main extends Application {
             return in.readObject();
         }
         out.writeObject(message);
-        Thread.sleep(100);
+        Thread.sleep(500);
         return returnedMessage;
     }
 
